@@ -91,6 +91,64 @@ $i = 0;
 			//Incrémentation $i
 			$i = $i +1;
 		}
+		?>
+			</br></br></br></br>
+		<?php
+		//Affichage Prof\\
+		//L'utilisateur est-il prof ?
+		$requete = "SELECT prof FROM UTILISATEUR WHERE login = ?"; //Faudrait tout récup et mettre dans des variables session.
+		$reponse = $bdd -> prepare($requete);
+		$reponse -> execute(array($_SESSION['login']));
+		$wait = $reponse -> fetch();
+		$prof = $wait['prof'];
+		$reponse->closeCursor();
+
+		//S'il est prof alors afficher sa partie
+		if($prof == 1)
+		{
+			echo 'Vous êtes prof';
+			?>
+				</br>
+			<?php
+			echo 'Modifier un formulaire:';
+			?>
+				</br></br>
+			<?php
+			
+			//Affichage des formulaires
+			$requete = "SELECT * FROM QUESTIONNAIRE";
+			$reponse = $bdd -> query($requete);
+
+			while ($donnees = $reponse->fetch())
+			{
+				echo 'Formulaire: ';
+				echo $donnees['id_questionnaire'];
+				?>
+					</br>
+				<?php
+				echo 'Nom: ';
+				echo $donnees['nom'];
+				?>
+					</br>
+				<?php
+				echo 'Description: ';
+				echo $donnees['description'];
+				?>
+					</br>
+				<?php
+				echo '<a href="modifier.php?num='.$donnees['id_questionnaire'].'">Modifier</a>';
+				?>
+					</br>
+				<?php
+				?>
+					</br>
+				<?php
+			}
+			$reponse->closeCursor();
+		}
+		
+		
+		
 	?>
     </body>
 </html>
