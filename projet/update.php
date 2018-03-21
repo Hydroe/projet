@@ -27,6 +27,9 @@ $i = 0;
 						die('Erreur : ' . $e->getMessage());
 				}
 
+				global $bdd;
+				
+
 		//Affichage Prof\\
 		//L'utilisateur est-il prof ?
 		$requete = "SELECT prof FROM UTILISATEUR WHERE login = ?"; //Faudrait tout récup et mettre dans des variables session.
@@ -39,30 +42,55 @@ $i = 0;
 		//S'il est prof alors afficher sa partie
 			if($prof == 1)
 			{
-				echo 'Est prof ';
-				if($_GET['type'] == 'update')
+	
+				if($_GET['type'] == 'update') //Modification questionnaire
 				{
-					echo 'Entre dans if';
 					$requete = "SELECT * FROM QUESTION WHERE id_questionnaire = ? ORDER BY id_question";
 					$reponse = $bdd -> prepare($requete);
 					$reponse -> execute(array($_GET['questionnaire']));
 
 					while ($donnees = $reponse->fetch())
 					{
-							$req = $bdd->prepare('UPDATE QUESTION SET texte = :Q WHERE id_question = num_q');
-							$req->execute(array(
-								'Q' => $_POST[{$donnees['id_question']}],
-								'num_q' => $donnees['id_question']
-								)
-							);
+						$tamp = $donnees['id_question'];
+						$req = $bdd->prepare('UPDATE QUESTION SET texte = :Q WHERE id_question = :num_q');
+						$req -> execute(array(
+							'Q' => $_POST[$tamp],
+							'num_q' => $donnees['id_question']
+							));
 					}
-					$baz = array("value" => $_GET['questionnaire']);
-					echo $_GET['questionnaire'];
-					echo $baz['value'];
-					//header("Location: modifier.php?num={$baz['value']}");
-					//exit;
 					$reponse->closeCursor();
 				}
+				elseif ($_GET['type'] == 'add') //Ajout questionnaire
+				{
+					$req = $bdd->prepare("INSERT INTO QUESTION(id_questionnaire, texte) 
+									VALUES(:id_questionnaire, :texte)");
+					$req->execute(array(
+						'id_questionnaire' => $_GET['questionnaire'],
+						'texte' => $_POST['add'],
+					));
+				}
+				elseif ($_GET['type'] == 'delete') //Suppression question
+				{
+					
+					$requete = "SELECT * FROM QUESTION WHERE id_questionnaire = ? ORDER BY id_question";
+					$reponse = $bdd -> prepare($requete);
+					$reponse -> execute(array($_GET['questionnaire']));
+
+					while ($donnees = $reponse->fetch())
+					{
+						$tamp = $donnees['id_question'];
+						if(isset($_POST[$tamp]) && $_POST[$tamp] == 'on')
+						{
+							$req = $bdd->exec('DELETE FROM QUESTION WHERE id_question='.$tamp.' ');
+							echo $tamp;
+							echo 'S';
+						}
+					}
+					$reponse->closeCursor();
+				}
+				$baz = array("value" => $_GET['questionnaire']);
+				header("Location: modifier.php?num={$baz['value']}");
+				exit;
 			}
 			?>
     </body>

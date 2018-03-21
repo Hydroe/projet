@@ -1,11 +1,42 @@
 <?php
-session_start();
-$_SESSION['question'] = 1;
+/*
+*Créé le 21 Mars 2018, MT.
+*Fichier d'autentification des utilisateurs.
+*La page recoit $_POST['login'] et $_POST['password'].
+*Si ID et MDP correct: le contenus des $_POST sont assignés aux $_SESSION et redirection vers choix.php
+*Si MDP incorrect: Redirection vers la page Index.php avec l'affichage d'un message d'erreur
+*Si ID inconnus: Redirection vers la page Index.php avec l'affichage d'un message de création de compte
+*Modification: Date/Initiales/Choses_modifiées
+*ex:(23 Mars 2018/MT/Création des commentaires)
+*
+*
+*/
+
+/*
+*Initialisation de la connexion de la base de donnée et vérification des erreurs en adéquation.
+*Lancement de la session.
+*/
+//Appel du fichier contenant les variables
+require_once('fonction.php');
+$id_bdd = id_bdd();
+//Vérification de la connexion à la bdd
+try
+{
+	$bdd = new PDO($id_bdd['nsd'],$id_bdd['id'],$id_bdd['mdp']);
+}
+catch (Exception $e)
+{
+    die('Erreur : ' . $e->getMessage());
+}
+
+/*
+*Création des variables utiles.
+*i -> variable d'incrémentation dans diverses parties du code
+*/
 $i = 0;
+
 ?>
-
 <!DOCTYPE html>
-
 <html>
     <head>
         <meta charset="utf-8" />
@@ -13,35 +44,32 @@ $i = 0;
     </head>
 
     <body>
-			<?php
-				$id="crepinl";
-				$mdp="1108010387S";
-				$nsd="mysql:host=webinfo.iutmontp.univ-montp2.fr;dbname=crepinl;charset=UTF8";
-				
-				try{
-					$bdd = new PDO($nsd,$id,$mdp);
-				}catch (Exception $e){
-						die('Erreur : ' . $e->getMessage());
-				}
-				
-				$reponse = $bdd->query("SELECT login FROM UTILISATEUR WHERE id_utilisateur = ".$_SESSION['id']);
-				$donnees = $reponse->fetchObject();
-					if($donnees==false){
-						$fini=true;
-					}else{
-						echo 'Bienvenue ';
-						echo $donnees->login;
-					}
-			?>
-		<?php
-		//Compter le nombre de formulaires présents
-		$reponse = $bdd->query('SELECT COUNT(*) AS nbQuestionnaires FROM QUESTIONNAIRE');
-		$donnees = $reponse->fetchObject();
-		$nbQuestionnaires = $donnees->nbQuestionnaires;
-		$reponse->closeCursor();
+	<?php
+
+	/*
+	*Message de bienvenue à l'utilisateur.
+	*/
+	$reponse = $bdd->query("SELECT login FROM UTILISATEUR WHERE id_utilisateur = ".$_SESSION['id']);
+	$donnees = $reponse->fetchObject();
+	if($donnees==false){
+		$fini=true;
+	}else{
+		echo 'Bienvenue ';
+		echo $donnees->login;
+	}
+
+	/*
+	*Affichage des formulaires.
+	*Connaître le nombre de formulaire pour 
+	*/
+	//Compter le nombre de formulaires présents
+	$reponse = $bdd->query('SELECT COUNT(*) AS nbQuestionnaires FROM QUESTIONNAIRE');
+	$donnees = $reponse->fetchObject();
+	$nbQuestionnaires = $donnees->nbQuestionnaires;
+	$reponse->closeCursor();
 		
-		$i = 1;
-		while($i <= $nbQuestionnaires)
+	$i = 1;
+	while($i <= $nbQuestionnaires)
 		{
 			//Vérifier s'il a répondu aux questions avant d'afficher les formulaires 
 			//On regarde le nombre de question du questionnaire\\

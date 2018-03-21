@@ -43,7 +43,7 @@ $send = $_GET['num'];
 			$requete = "SELECT * FROM QUESTION WHERE id_questionnaire = ? ORDER BY id_question";
 			$reponse = $bdd -> prepare($requete);
 			$reponse -> execute(array($_GET['num']));
-			echo 'Modifier';			?>
+			echo 'Modifier:';			?>
 				</br></br>
 				<form action=update.php?type=update&amp;questionnaire=<?php echo $send ?> method="POST" >
 			<?php
@@ -54,25 +54,52 @@ $send = $_GET['num'];
 				echo $donnees['id_question'];
 				echo ' ';
 				echo $donnees['texte'];
+				$coch = $donnees['id_question'] * 9999;
 				?>
 					</br>
-					<textarea name="<?php $donnees['id_question'] ?>" rows="4" cols="45" ><?php echo $donnees['texte']?></textarea>
+					<textarea name="<?php echo $donnees['id_question'] ?>" rows="4" cols="45" ><?php echo $donnees['texte']?></textarea>
 					</br></br>
 				<?php
 			}
 			$reponse->closeCursor();
 			?>
-				<p><input type="submit" name="valider" value="Valider votre modification" href=""></p>
+				<p><input type="submit" name="valider" value="Valider votre modification/Supprimer" href=""></p>
 			</form>
 			<?php
 
-			echo 'Ajouter'
+			echo 'Ajouter:'
 
 			?>
 				</br></br>
 				<form action=update.php?type=add&amp;questionnaire=<?php echo $send ?> method="POST" >
-				<textarea name="add" rows="4" cols="45" >Ajoutez votre question</textarea>
-				<p><input type="submit" name="valider" value="Valider votre ajout" href=""></p>
+					<textarea name="add" rows="4" cols="45" >Ajoutez votre question</textarea>
+					<p><input type="submit" name="valider" value="Valider votre ajout" href=""></p>
+				</form>
+				</br></br>
+			<?php
+
+			echo 'Supprimer:';
+
+			$requete = "SELECT * FROM QUESTION WHERE id_questionnaire = ? ORDER BY id_question";
+			$reponse = $bdd -> prepare($requete);
+			$reponse -> execute(array($_GET['num']));
+
+			?>
+				</br></br>
+				<form action=update.php?type=delete&amp;questionnaire=<?php echo $send ?> method="POST" >
+			<?php
+
+			while ($donnees = $reponse->fetch())
+			{
+				?>
+					<input type="checkbox" name="<?php echo $donnees['id_question'] ?>" id="<?php echo $donnees['id_question'] ?>" /> <label for="<?php echo $donnees['id_question'] ?>">Question <?php echo $donnees['id_question'] ?></label><br />
+				<?php
+			}
+			$reponse->closeCursor();
+			?>
+				<input type="submit" value="Supprimer">
+				</form>
+				</br></br>
 			<?php
 		}
 			?>
