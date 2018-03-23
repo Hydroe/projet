@@ -42,7 +42,6 @@ $i = 0;
 		//S'il est prof alors afficher sa partie
 			if($prof == 1)
 			{
-	
 				if($_GET['type'] == 'update') //Modification questionnaire
 				{
 					$requete = "SELECT * FROM QUESTION WHERE id_questionnaire = ? ORDER BY id_question";

@@ -1,5 +1,35 @@
 <?php
-session_start();
+/*
+*Créé le 21 Mars 2018, MT.
+*Fichier d'enregistrement ou de modification d'une réponse de l'utilisateur
+*La page recoit $_GET['id_questionnaire']
+*Initialisation de la connexion de la base de donnée et vérification des erreurs en adéquation.
+*Lancement de la session.
+*Vérifie s'il s'agit bien d'un utilisateur autorisé.
+*Modification: Date/Initiales/Choses_modifiées
+*22 Mars 2018/MT/Modification de Enregistrer la réponse, avec différentiation de l'add et de l'update.
+*
+*
+*/
+
+/*
+*Initialisation de la connexion de la base de donnée et vérification des erreurs en adéquation.
+*Lancement de la session.
+*/
+//Appel du fichier contenant les variables
+require_once('fonction.php');
+require_once('utilisateur.php');
+$id_bdd = Id_bdd();
+//Vérification de la connexion à la bdd
+try
+{
+	$bdd = new PDO($id_bdd['nsd'],$id_bdd['id'],$id_bdd['mdp']);
+}
+catch (Exception $e)
+{
+    die('Erreur : ' . $e->getMessage());
+}
+
 $_SESSION['question'] = 1;
 $i = 0;
 $send = $_GET['num'];
@@ -15,37 +45,18 @@ $send = $_GET['num'];
 
     <body>
 			<?php
-				$id="crepinl";
-				$mdp="1108010387S";
-				$nsd="mysql:host=webinfo.iutmontp.univ-montp2.fr;dbname=crepinl;charset=UTF8";
-				
-				try
-				{
-					$bdd = new PDO($nsd,$id,$mdp);
-				}
-				catch (Exception $e)
-				{
-						die('Erreur : ' . $e->getMessage());
-				}
-
-		//Affichage Prof\\
-		//L'utilisateur est-il prof ?
-		$requete = "SELECT prof FROM UTILISATEUR WHERE login = ?"; //Faudrait tout récup et mettre dans des variables session.
-		$reponse = $bdd -> prepare($requete);
-		$reponse -> execute(array($_SESSION['login']));
-		$wait = $reponse -> fetch();
-		$prof = $wait['prof'];
-		$reponse->closeCursor();
-
-		//S'il est prof alors afficher sa partie
-		if($prof == 1)
+		/*
+		*Vérifie s'il s'agit bien d'un utilisateur autorisé.
+		*/
+		if($_SESSION['prof'] == 1)
 		{
 			$requete = "SELECT * FROM QUESTION WHERE id_questionnaire = ? ORDER BY id_question";
 			$reponse = $bdd -> prepare($requete);
 			$reponse -> execute(array($_GET['num']));
-			echo 'Modifier:';			?>
+			echo 'Modifier:';			
+			?>
 				</br></br>
-				<form action=update.php?type=update&amp;questionnaire=<?php echo $send ?> method="POST" >
+				<form action=update.php?type=update&amp;questionnaire=<?php echo $_GET['num'] ?> method="POST" >
 			<?php
 
 			while ($donnees = $reponse->fetch())
@@ -71,7 +82,7 @@ $send = $_GET['num'];
 
 			?>
 				</br></br>
-				<form action=update.php?type=add&amp;questionnaire=<?php echo $send ?> method="POST" >
+				<form action=update.php?type=add&amp;questionnaire=<?php echo $_GET['num'] ?> method="POST" >
 					<textarea name="add" rows="4" cols="45" >Ajoutez votre question</textarea>
 					<p><input type="submit" name="valider" value="Valider votre ajout" href=""></p>
 				</form>
@@ -86,7 +97,7 @@ $send = $_GET['num'];
 
 			?>
 				</br></br>
-				<form action=update.php?type=delete&amp;questionnaire=<?php echo $send ?> method="POST" >
+				<form action=update.php?type=delete&amp;questionnaire=<?php echo $_GET['num'] ?> method="POST" >
 			<?php
 
 			while ($donnees = $reponse->fetch())

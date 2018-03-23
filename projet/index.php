@@ -2,7 +2,12 @@
 
 /*
 *Créé le 21 Mars 2018, MT.
-*Fichier index. Base du site
+*Fichier index.php Base du site
+*Initialisation de la connexion de la base de donnée et vérification des erreurs en adéquation.
+*Lancement de la session.
+*Création des variables sessions utiles.
+*Interface de connexion
+*Renvois d'informations
 *Modification: Date/Initiales/Choses_modifiées
 *ex:(23 Mars 2018/MT/Création des commentaires)
 *
@@ -15,7 +20,7 @@
 */
 //Appel du fichier contenant les variables
 require_once('fonction.php');
-$id_bdd = id_bdd();
+$id_bdd = Id_bdd();
 //Vérification de la connexion à la bdd
 try
 {
@@ -30,11 +35,11 @@ catch (Exception $e)
 /*
 *Création des variables sessions utiles.
 *login -> login de l'utilisateur
-*password -> password de l'utilisateur
+*prof -> prof de l'utilisateur
 *id -> id de l'utilisateur dans la base de donnée
 */
 $_SESSION['login'] = 'invalide';
-$_SESSION['password'] = 'invalide';
+$_SESSION['prof'] = 'invalide';
 $_SESSION['id'] = 0;
 
 ?>

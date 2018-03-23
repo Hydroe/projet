@@ -1,27 +1,44 @@
 <?php
+/*
+*Créé le 21 Mars 2018, MT.
+*Fichier de liste de choix des questions.
+*La page recoit $_GET['id_questionnaire'].
+*Initialisation de la connexion de la base de donnée et vérification des erreurs en adéquation.
+*Lancement de la session.
+*Affichage des questions de du questionnaire correspondant au numero id_questionnaire
+*Modification: Date/Initiales/Choses_modifiées
+*23 Mars 2018/MT/Réecriture des echo en une ligne
+*
+*
+*/
 
-$id="crepinl";
-$mdp="1108010387S";
-$nsd="mysql:host=webinfo.iutmontp.univ-montp2.fr;dbname=crepinl;charset=UTF8";
-try{
-	$sgbd=new PDO($nsd,$id,$mdp);
-}catch(PDOException $e){
-	die("Echec à la connexion ".$e->getMessage());
+/*
+*Initialisation de la connexion de la base de donnée et vérification des erreurs en adéquation.
+*Lancement de la session.
+*/
+//Appel du fichier contenant les variables
+require_once('fonction.php');
+require_once('utilisateur.php');
+$id_bdd = Id_bdd();
+//Vérification de la connexion à la bdd
+try
+{
+	$bdd = new PDO($id_bdd['nsd'],$id_bdd['id'],$id_bdd['mdp']);
 }
-$requete="SELECT * FROM QUESTION WHERE id_questionnaire ={$_GET["id_questionnaire"]}";
-$resultat=$sgbd->query($requete);
+catch (Exception $e)
+{
+    die('Erreur : ' . $e->getMessage());
+}
 
-
-if($resultat==false)
-	exit("erreur PDO:query($requete)");
-
-$fini=false;
-while(!$fini){
-	$questions=$resultat->fetchObject();
-	if($questions==false){
-		$fini=true;
-	}else{
-		echo "<li>"."<a href=\"formulaire1.php?id_questionnaire=".$questions -> id_questionnaire."&id_question=".$questions -> id_question."\">"."Question ".$questions -> id_question."</a>"." :\"".$questions -> texte."\"</li>";
+/*
+*Affichage des questions de du questionnaire correspondant au numero id_questionnaire
+*/
+//Recherche des questions correspondantes au questionnaire numero id_questionnaire
+$idQuestions = GetTousId_questionnQuestion($_GET["id_questionnaire"]);
+$i = 0;
+while(isset($idQuestions[$i]))
+	{
+		echo "<li>"."<a href=\"formulaire1.php?id_questionnaire=".$_GET["id_questionnaire"]."&id_question=".$idQuestions[$i]."\">"."Question ".GetNumero_questionQuestion($idQuestions[$i])."</a>"." :\"".GetTexteQuestion($idQuestions[$i])."\"</li>";
+		$i++;
 	}
-}
 ?>

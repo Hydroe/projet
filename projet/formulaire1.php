@@ -1,16 +1,35 @@
 <?php
-session_start();
-	$id="crepinl";
-	$mdp="1108010387S";
-	$nsd="mysql:host=webinfo.iutmontp.univ-montp2.fr;dbname=crepinl;charset=UTF8";
-	try
-				{
-					$bdd = new PDO($nsd,$id,$mdp);
-				}
-				catch (Exception $e)
-				{
-						die('Erreur : ' . $e->getMessage());
-				}
+/*
+*Créé le 21 Mars 2018, MT.
+*Fichier de réponse au question
+*La page recoit $_GET['id_questionnaire'] et $_GET["id_question"]
+*Initialisation de la connexion de la base de donnée et vérification des erreurs en adéquation.
+*Lancement de la session.
+*Vérifier si la question à déjà une réponse de l'utilisateur.
+*Enregistrer la réponse.
+*Modification: Date/Initiales/Choses_modifiées
+*22 Mars 2018/MT/Modification de Enregistrer la réponse, avec différentiation de l'add et de l'update.
+*
+*
+*/
+
+/*
+*Initialisation de la connexion de la base de donnée et vérification des erreurs en adéquation.
+*Lancement de la session.
+*/
+//Appel du fichier contenant les variables
+require_once('fonction.php');
+require_once('utilisateur.php');
+$id_bdd = Id_bdd();
+//Vérification de la connexion à la bdd
+try
+{
+	$bdd = new PDO($id_bdd['nsd'],$id_bdd['id'],$id_bdd['mdp']);
+}
+catch (Exception $e)
+{
+    die('Erreur : ' . $e->getMessage());
+}
 ?>
 
 <!DOCTYPE html>
@@ -21,41 +40,30 @@ session_start();
     </head>
 
     <body>
-		<h1><?php echo htmlspecialchars($_SESSION['login']) . ' ' . htmlspecialchars($_SESSION['password']);?></h1>
+		<h1><?php echo htmlspecialchars($_SESSION['login']);?></h1>
 		<?php
-				$requete="SELECT * FROM QUESTION WHERE id_questionnaire ={$_GET["id_questionnaire"]} and id_question={$_GET["id_question"]}";
-				$resultat=$bdd->query($requete);
-				$questions=$resultat->fetchObject();
-				echo "Question ".$questions -> id_question." :\"".$questions -> texte."\"</a>"."</li>";
-		?>
-		<?php
-				//On compte le nombre total de questions (à terme, à mettre au début de la création session (index.php)) ou plus simplement à récupérer dans la table
-				$reponse = $bdd->prepare('SELECT COUNT(*) AS nbQuestions FROM QUESTION WHERE id_questionnaire = ?');
-				$reponse->execute(array(1));
-		
-				$donnees = $reponse->fetch();
-				$nbQuestions = $donnees['nbQuestions'];
-				$reponse->closeCursor();
+/*
+*Vérifier si la question à déjà une réponse de l'utilisateur.
+*Si non alors afficher "Saisissez votre réponse".
+*Si oui alors afficher la réponse déjà saisie.
+*/
+			echo "Question ".GetNumero_questionQuestion($_GET['id_question'])." :\"".GetTexteQuestion($_GET['id_question'])."\"</a>"."</li>";
 				
 				//verification s'il y a déjà une réponse
-				$requete="SELECT COUNT(*) nb FROM REPONSE WHERE id_utilisateur =".$_SESSION['id']." and id_question={$_GET["id_question"]}";
-				$resultat=$bdd->query($requete);
-				$questions=$resultat->fetchObject();
-				if($questions->nb==0){
+				if(VerifierSiDejaReponse($_SESSION['id'], $_GET['id_question'])==0){
 					$texte="Saisissez votre réponse";
 				}else{
-					$requete="SELECT * FROM REPONSE WHERE id_utilisateur =".$_SESSION['id']." and id_question={$_GET["id_question"]}";
-					$resultat=$bdd->query($requete);
-					$questions=$resultat->fetchObject();
-					$texte=$questions->reponse;
+					$texte = GetTexteReponse($_SESSION['id'], $_GET['id_question']);
 				}
+		SautLigneDansPhp(1);
+
+/*
+*Enregistrer la réponse.
+*Si il y a déjà une réponse alors il s'agit d'une modification, redirection vers enregistre.php avec comme paramètre l'id_questionnaire, l'id_question ainsi que type = update.
+*Si il n'y a pas de réponse alors il s'agit d'un ajout, redirection vers enregistre.php avec comme paramètre l'id_questionnaire, l'id_question ainsi que type = add.
+*/
 		?>
-		</br>
-		<?php
-			$reponse = $bdd->prepare('SELECT * FROM QUESTION WHERE id_questionnaire = ?');
-			$reponse->execute(array(1));
-		?>
-		<form action=<?php echo "enregistre.php?id_questionnaire=".$_GET["id_questionnaire"]."&id_question=".$_GET["id_question"] ?> method="POST">
+		<form action=<?php echo $adresse = (VerifierSiDejaReponse($_SESSION['id'], $_GET['id_question'])==0) ? "enregistre.php?id_questionnaire=".$_GET['id_questionnaire']."&amp;id_question=".$_GET['id_question']."&amp;type=add" : "enregistre.php?id_questionnaire=".$_GET['id_questionnaire']."&amp;id_question=".$_GET['id_question']."&amp;type=update" ; ?> method="POST">
 			<textarea name="message" rows="8" cols="45" ><?php echo $texte ?></textarea>
 			<p><input type="submit" name="valider" value="Valider" href=""></p>
 		</form>
