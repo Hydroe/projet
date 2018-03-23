@@ -1,7 +1,37 @@
 <?php
-session_start();
-$_SESSION['question'] = 1;
-$i = 0;
+/*
+*Créé le 21 Mars 2018, MT.
+*Fichier qui effectue les changements demandés par le fichier modifier.php
+*La page recoit $_GET['type'] avec soit update, add ou delete, $_GET['idquestionnaire'] pour le numero du questionnaire et $_POST[valeur] avec des chiffres pour le texte à modifier.
+*Initialisation de la connexion de la base de donnée et vérification des erreurs en adéquation.
+*Lancement de la session.
+*Vérifie s'il s'agit bien d'un utilisateur autorisé.
+*Partie qui permet de modifier une ou des questions du formulaire.
+*Partie qui permet d'ajouter une questions du formulaire.
+*Partie qui permet de supprimer une ou des questions du formulaire
+*Modification: Date/Initiales/Choses_modifiées
+*22 Mars 2018/MT/Modification de Enregistrer la réponse, avec différentiation de l'add et de l'update.
+*
+*
+*/
+
+/*
+*Initialisation de la connexion de la base de donnée et vérification des erreurs en adéquation.
+*Lancement de la session.
+*/
+//Appel du fichier contenant les variables
+require_once('fonction.php');
+require_once('utilisateur.php');
+$id_bdd = Id_bdd();
+//Vérification de la connexion à la bdd
+try
+{
+	$bdd = new PDO($id_bdd['nsd'],$id_bdd['id'],$id_bdd['mdp']);
+}
+catch (Exception $e)
+{
+    die('Erreur : ' . $e->getMessage());
+}
 ?>
 
 <!DOCTYPE html>
@@ -13,82 +43,42 @@ $i = 0;
     </head>
 
     <body>
-			<?php
-				$id="crepinl";
-				$mdp="1108010387S";
-				$nsd="mysql:host=webinfo.iutmontp.univ-montp2.fr;dbname=crepinl;charset=UTF8";
-				
-				try
-				{
-					$bdd = new PDO($nsd,$id,$mdp);
-				}
-				catch (Exception $e)
-				{
-						die('Erreur : ' . $e->getMessage());
-				}
-
-				global $bdd;
-				
-
+		<?php
 		//Affichage Prof\\
 		//L'utilisateur est-il prof ?
-		$requete = "SELECT prof FROM UTILISATEUR WHERE login = ?"; //Faudrait tout récup et mettre dans des variables session.
-		$reponse = $bdd -> prepare($requete);
-		$reponse -> execute(array($_SESSION['login']));
-		$wait = $reponse -> fetch();
-		$prof = $wait['prof'];
-		$reponse->closeCursor();
-
 		//S'il est prof alors afficher sa partie
-			if($prof == 1)
+			if($_SESSION['prof'] == 1)
 			{
 				if($_GET['type'] == 'update') //Modification questionnaire
 				{
-					$requete = "SELECT * FROM QUESTION WHERE id_questionnaire = ? ORDER BY id_question";
-					$reponse = $bdd -> prepare($requete);
-					$reponse -> execute(array($_GET['questionnaire']));
-
-					while ($donnees = $reponse->fetch())
+					$id_question = GetTousId_questionnQuestion($_GET['idquestionnaire']);
+					$i = 0;
+					while (isset($id_question[$i]))
 					{
-						$tamp = $donnees['id_question'];
-						$req = $bdd->prepare('UPDATE QUESTION SET texte = :Q WHERE id_question = :num_q');
-						$req -> execute(array(
-							'Q' => $_POST[$tamp],
-							'num_q' => $donnees['id_question']
-							));
+						UpdateQuestion($id_question[$i], $_POST[$id_question[$i]]);
+						$i++;
 					}
-					$reponse->closeCursor();
 				}
 				elseif ($_GET['type'] == 'add') //Ajout questionnaire
 				{
-					$req = $bdd->prepare("INSERT INTO QUESTION(id_questionnaire, texte) 
-									VALUES(:id_questionnaire, :texte)");
-					$req->execute(array(
-						'id_questionnaire' => $_GET['questionnaire'],
-						'texte' => $_POST['add'],
-					));
+					AjouterQuestion($_GET['idquestionnaire'], $_POST['add']);
 				}
 				elseif ($_GET['type'] == 'delete') //Suppression question
 				{
 					
-					$requete = "SELECT * FROM QUESTION WHERE id_questionnaire = ? ORDER BY id_question";
-					$reponse = $bdd -> prepare($requete);
-					$reponse -> execute(array($_GET['questionnaire']));
-
-					while ($donnees = $reponse->fetch())
+					$id_question = GetTousId_questionnQuestion($_GET['idquestionnaire']);
+					$i = 0;
+					while (isset($id_question[$i]))
 					{
-						$tamp = $donnees['id_question'];
-						if(isset($_POST[$tamp]) && $_POST[$tamp] == 'on')
+						if(isset($_POST[$id_question[$i]]) && $_POST[$id_question[$i]] == 'on')
 						{
-							$req = $bdd->exec('DELETE FROM QUESTION WHERE id_question='.$tamp.' ');
-							echo $tamp;
-							echo 'S';
+							DeleteQuestion($id_question[$i]);
 						}
+						$i++;
 					}
-					$reponse->closeCursor();
 				}
-				$baz = array("value" => $_GET['questionnaire']);
-				header("Location: modifier.php?num={$baz['value']}");
+				$baz = array("value" => $_GET['idquestionnaire']);
+				header("Location: modifier.php?id_questionnaire={$baz['value']}");
 				exit;
 			}
 			?>

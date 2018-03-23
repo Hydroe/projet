@@ -77,7 +77,7 @@ $i = 1;
 				SautLigneDansPhp(1);
 				echo 'Formulaire' .$i .': ' .$nbReponses .'/' .$nbQuestions .' <a href="valider.php">Voir réponse</a>';
 			}
-			//Si toutes les questions n'ont pas leurs réponses, on donne accès à listequestion.php avec en paramètre le numero du id_questionnaire
+			//Si toutes les questions n'ont pas leurs réponses, on donne accès à listequestion.php avec en paramètre le id_questionnaire du id_questionnaire
 			elseif($nbReponses < $nbQuestions)
 			{
 				?>
@@ -121,7 +121,7 @@ $i = 1;
 				SautLigneDansPhp(1);
 				echo 'Description: ' .GetDescriptionQuestionnaire($id_questionnaire[$i]);
 				SautLigneDansPhp(1);
-				echo '<a href="modifier.php?num='.$id_questionnaire[$i].'">Modifier</a> / <a href="supprimer.php?num='.$id_questionnaire[$i].'">Supprimer</a>';
+				echo '<a href="modifier.php?id_questionnaire='.$id_questionnaire[$i].'">Modifier</a> / <a href="supprimer.php?id_questionnaire='.$id_questionnaire[$i].'">Supprimer</a>';
 				SautLigneDansPhp(2);
 				$i++;
 			}

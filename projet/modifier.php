@@ -2,10 +2,13 @@
 /*
 *Créé le 21 Mars 2018, MT.
 *Fichier d'enregistrement ou de modification d'une réponse de l'utilisateur
-*La page recoit $_GET['id_questionnaire']
+*La page recoit $_GET['id_questionnaire'].
 *Initialisation de la connexion de la base de donnée et vérification des erreurs en adéquation.
 *Lancement de la session.
 *Vérifie s'il s'agit bien d'un utilisateur autorisé.
+*Partie qui permet de modifier une ou des questions du formulaire.
+*Partie qui permet d'ajouter une questions du formulaire.
+*Partie qui permet de supprimer une ou des questions du formulaire
 *Modification: Date/Initiales/Choses_modifiées
 *22 Mars 2018/MT/Modification de Enregistrer la réponse, avec différentiation de l'add et de l'update.
 *
@@ -32,7 +35,6 @@ catch (Exception $e)
 
 $_SESSION['question'] = 1;
 $i = 0;
-$send = $_GET['num'];
 ?>
 
 <!DOCTYPE html>
@@ -50,63 +52,63 @@ $send = $_GET['num'];
 		*/
 		if($_SESSION['prof'] == 1)
 		{
-			$requete = "SELECT * FROM QUESTION WHERE id_questionnaire = ? ORDER BY id_question";
-			$reponse = $bdd -> prepare($requete);
-			$reponse -> execute(array($_GET['num']));
-			echo 'Modifier:';			
+			/*
+			*Partie qui permet de modifier une ou des questions du formulaire.
+			*/
+			$id_question = GetTousId_questionnQuestion($_GET['id_questionnaire']);
+			echo 'Modifier:';
+			echo $_GET['id_questionnaire'];
 			?>
 				</br></br>
-				<form action=update.php?type=update&amp;questionnaire=<?php echo $_GET['num'] ?> method="POST" >
+				<form action=<?php echo "update.php?type=update&idquestionnaire=" .$_GET['id_questionnaire']; ?> method="POST" >
 			<?php
-
-			while ($donnees = $reponse->fetch())
+			$i = 0;
+			while (isset($id_question[$i]))
 			{
-				echo 'Question: ';
-				echo $donnees['id_question'];
-				echo ' ';
-				echo $donnees['texte'];
-				$coch = $donnees['id_question'] * 9999;
+				echo 'Question: ' .$id_question[$i] .' ' .GetTexteQuestion($id_question[$i]);
 				?>
 					</br>
-					<textarea name="<?php echo $donnees['id_question'] ?>" rows="4" cols="45" ><?php echo $donnees['texte']?></textarea>
+					<textarea name="<?php echo $id_question[$i]; ?>" rows="4" cols="45" ><?php echo GetTexteQuestion($id_question[$i]);?></textarea>
 					</br></br>
 				<?php
+				$i++;
 			}
-			$reponse->closeCursor();
 			?>
 				<p><input type="submit" name="valider" value="Valider votre modification/Supprimer" href=""></p>
 			</form>
 			<?php
-
+			/*
+			*Partie qui permet d'ajouter une questions du formulaire.
+			*/
 			echo 'Ajouter:'
 
 			?>
 				</br></br>
-				<form action=update.php?type=add&amp;questionnaire=<?php echo $_GET['num'] ?> method="POST" >
+				<form action=update.php?type=add&amp;idquestionnaire=<?php echo $_GET['id_questionnaire'] ?> method="POST" >
 					<textarea name="add" rows="4" cols="45" >Ajoutez votre question</textarea>
 					<p><input type="submit" name="valider" value="Valider votre ajout" href=""></p>
 				</form>
 				</br></br>
 			<?php
 
+			/*
+			*Partie qui permet de supprimer une ou des questions du formulaire.
+			*/
 			echo 'Supprimer:';
-
-			$requete = "SELECT * FROM QUESTION WHERE id_questionnaire = ? ORDER BY id_question";
-			$reponse = $bdd -> prepare($requete);
-			$reponse -> execute(array($_GET['num']));
 
 			?>
 				</br></br>
-				<form action=update.php?type=delete&amp;questionnaire=<?php echo $_GET['num'] ?> method="POST" >
+				<form action=update.php?type=delete&amp;idquestionnaire=<?php echo $_GET['id_questionnaire'] ?> method="POST" >
 			<?php
 
-			while ($donnees = $reponse->fetch())
+			$i = 0;
+			while (isset($id_question[$i]))
 			{
 				?>
-					<input type="checkbox" name="<?php echo $donnees['id_question'] ?>" id="<?php echo $donnees['id_question'] ?>" /> <label for="<?php echo $donnees['id_question'] ?>">Question <?php echo $donnees['id_question'] ?></label><br />
+					<input type="checkbox" name="<?php echo $id_question[$i] ?>" id="<?php echo $id_question[$i] ?>" /> <label for="<?php echo $id_question[$i] ?>">Question <?php echo $id_question[$i] ?></label><br />
 				<?php
+				$i++;
 			}
-			$reponse->closeCursor();
 			?>
 				<input type="submit" value="Supprimer">
 				</form>

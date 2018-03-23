@@ -23,10 +23,14 @@
 	-GetPasswordUtilisateur					/ Fonction qui renvoie le password de l'utilisateur.
 	-GetIdUtilisateurs						/ Fonction qui renvoie le password de l'utilisateur.
 	-AjouterUtilisateur						/ Fonction enregistre un utilisateur.
+	-GetTousId_questionRepondues			/ Fonction renvoie les numero des questions répondues par l'utilisateur.
+	-GetReponseReponse   					/ Fonction renvoie la réponse d'une question.
+	-UpdateQuestion 						/ Fonction renvoie la réponse d'une question.
+	-*AjouterQuestion						/ Fonction qui ajoute une question à la bdd.
 	-
 *Modification: Date/Initiales/Choses_modifiées
 *22 Mars 2018/MT/Ajout fonctions: CompteNbQuestion, CompteNbQuestion, CompteNbReponse, GetTousId_questionnaireQuestionnaire, GetNomQuestionnaire, GetDescriptionQuestionnaire, GetTousId_questionnQuestion, GetNumero_questionQuestion, GetTexteQuestion, VerifierSiDejaReponse, AjouterReponse, UpdateReponse, GetTousLesUtilisateurs, GetPasswordUtilisateur, GetIdUtilisateurs
-*23 Mars 2018/MT/Ajout fonctions: AjouterUtilisateur
+*23 Mars 2018/MT/Ajout fonctions: AjouterUtilisateur, GetTousId_questionRepondues, GetReponseReponse, UpdateQuestion, AjouterQuestion
 *
 */
 
@@ -367,7 +371,7 @@ function GetTousId_questionRepondues($id_utilisateur)
 }
 
 /*
-*Fonction renvoie la réponse d'une question.
+*GetReponseReponseFonction renvoie la réponse d'une question.Fonction renvoie la réponse d'une question.
 *Recoit l'id_utilisateur de l'utilisateur et id_question de la réponse.
 *Renvoie la réponse de REPONSE.
 */
@@ -380,5 +384,47 @@ function GetReponseReponse($id_utilisateur, $id_question)
 	$rep2=$rep->reponse;
 	$req->closeCursor();
 	return $rep2;
+}
+
+/*
+*Fonction renvoie la réponse d'une question.
+*Recoit l'id_utilisateur de l'utilisateur et id_question de la réponse.
+*Renvoie la réponse de REPONSE.
+*/
+function UpdateQuestion($id_question, $texte)
+{
+	global $bdd;
+	$req = $bdd->prepare('UPDATE QUESTION SET texte = :Q WHERE id_question = :id_question');
+	$req -> execute(array(
+		'Q' => $texte,
+		'id_question' => $id_question
+	));
+}
+
+/*
+*Fonction qui ajoute une question à la bdd.
+*Recoit l'id_questionnaire de la question et la question texte à associé.
+*Ajoute une question dans la bdd.
+*/
+function AjouterQuestion($id_questionnaire, $texte)
+{
+	global $bdd;
+	$req = $bdd->prepare("INSERT INTO QUESTION(id_questionnaire, texte) 
+						VALUES(:id_questionnaire, :texte)");
+	$req->execute(array(
+		'id_questionnaire' => $id_questionnaire,
+		'texte' => $texte,
+	));
+}
+
+/*
+*Fonction qui retire une/des question précise à la bdd.
+*Recoit l'id_questionnaire de la question et la question texte à associé.
+*retire la/les question dans la bdd.
+*/
+function DeleteQuestion($id_question)
+{
+	global $bdd;
+	$req = $bdd->exec("DELETE FROM QUESTION WHERE id_question=" .$id_question);
 }
 ?>
